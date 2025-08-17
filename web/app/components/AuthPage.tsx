@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from './ui/alert'
 import { Calendar, Loader2, AlertCircle, CheckCircle, Settings } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { apiService } from '../services/api'
-import { toast } from 'sonner@2.0.3'
+import { toast } from 'sonner'
 
 export function AuthPage() {
   const [isLoading, setIsLoading] = useState(false)
