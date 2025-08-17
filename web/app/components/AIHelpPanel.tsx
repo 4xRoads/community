@@ -196,12 +196,13 @@ export function AIHelpPanel({ isOpen, onClose, onNavigate, tickets, shifts, driv
       return {
         type: 'assistant',
         content: `Here's your ticket breakdown by status: ${statusText}`,
-        citations: Object.entries(statusCounts).map(([status, count]) => ({
-          id: status,
-          type: 'ticket',
-          title: `${status} Tickets`,
-          count
-        })),
+        citations: (Object.entries(statusCounts) as [string, number][])
+          .map(([status, count]) => ({
+            id: status,
+            type: 'ticket',
+            title: `${status} Tickets`,
+            count,
+          })),
         actions: [
           {
             label: 'View All Tickets',
