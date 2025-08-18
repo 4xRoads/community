@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+// app/components/ScheduleBoard.tsx
+import { useState } from 'react'
 import { Button } from './ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -12,23 +13,43 @@ import {
   SelectValue,
 } from './ui/select'
 import { DriverCard } from './DriverCard'
-import { 
-  Plus, 
-  ChevronLeft, 
+import {
+  Plus,
+  ChevronLeft,
   ChevronRight,
-  Filter,
   Search,
   Clock,
-  User,
-  Calendar,
-  MapPin
 } from 'lucide-react'
-import { format, startOfWeek, addDays, addWeeks, subWeeks, isSameDay, isToday } from 'date-fns'
-import type { Shift } from '../services/api'
+import {
+  format,
+  startOfWeek,
+  addDays,
+  addWeeks,
+  subWeeks,
+  isSameDay,
+  isToday,
+} from 'date-fns'
+
+// ✅ Local, minimal shape used by this component only
+export type UiShift = {
+  id: string
+  driver: string
+  driverName?: string
+  route: string
+  date: string // yyyy-MM-dd
+  startTime: string // HH:mm
+  endTime: string   // HH:mm
+  status: 'scheduled' | 'confirmed' | 'pending' | 'called_off' | 'completed'
+  vehicle?: string
+  backupDriver?: string
+  backupDriverName?: string
+  hoursWorked?: number
+}
 
 interface ScheduleBoardProps {
   onCreateShift: () => void
-  shifts: Shift[]
+  // Use the same minimal shape for incoming shifts
+  shifts: UiShift[]
   onUpdateShift: (shiftId: string, data: any) => void
   onDeleteShift: (shiftId: string) => void
   onEditShift?: (shiftData: any) => void
@@ -36,18 +57,25 @@ interface ScheduleBoardProps {
 
 // Mock driver data for the summary
 const mockDrivers = [
-  { id: 'driver-1', name: 'John Smith' },
-  { id: 'driver-2', name: 'Sarah Johnson' },
-  { id: 'driver-3', name: 'Mike Rodriguez' },
-  { id: 'driver-4', name: 'Emily Chen' },
-  { id: 'driver-5', name: 'David Wilson' },
-  { id: 'driver-6', name: 'Lisa Brown' },
-  { id: 'driver-7', name: 'Tom Anderson' },
-  { id: 'driver-8', name: 'Maria Garcia' }
+  { id: 'driver-1', name: 'Jesse Williams' },
+  { id: 'driver-2', name: 'Mike Brown' },
+  { id: 'driver-3', name: 'Tanmay Shah' },
+  { id: 'driver-4', name: 'Joe King' },
+  { id: 'driver-5', name: 'David MacCluskie' },
+  { id: 'driver-6', name: 'Steven Williams' },
+  { id: 'driver-7', name: 'Steven Springer' },
+  { id: 'driver-8', name: 'Killian Hortsman' }
 ]
-
-export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteShift, onEditShift }: ScheduleBoardProps) {
-  const [currentWeek, setCurrentWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+export function ScheduleBoard({
+  onCreateShift,
+  shifts,
+  onUpdateShift,
+  onDeleteShift,
+  onEditShift,
+}: ScheduleBoardProps) {
+  const [currentWeek, setCurrentWeek] = useState(
+    () => startOfWeek(new Date(), { weekStartsOn: 1 })
+  )
   const [filterDriver, setFilterDriver] = useState<string>('all')
   const [filterRoute, setFilterRoute] = useState<string>('all')
   const [filterVehicle, setFilterVehicle] = useState<string>('all')
@@ -55,164 +83,163 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
 
   // Generate week days (Monday to Sunday)
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeek, i))
-  
+
   // Calculate week date range for header
   const weekStart = format(currentWeek, 'MMM d')
   const weekEnd = format(addDays(currentWeek, 6), 'MMM d, yyyy')
   const weekRange = `${weekStart}–${weekEnd}`
 
-  // Enhanced mock shifts for demonstration
-  const mockShifts: Shift[] = [
+  // ✅ Mock shifts now typed to UiShift (no extra API fields required)
+  const mockShifts: UiShift[] = [
     {
       id: 'shift-1',
       driver: 'John Smith',
       route: 'Route A-1',
-      date: format(addDays(currentWeek, 0), 'yyyy-MM-dd'), // Monday
+      date: format(addDays(currentWeek, 0), 'yyyy-MM-dd'),
       startTime: '08:00',
       endTime: '16:00',
       status: 'confirmed',
       vehicle: 'TRK-001',
       backupDriver: 'Sarah Johnson',
-      hoursWorked: 8
+      hoursWorked: 8,
     },
     {
       id: 'shift-2',
       driver: 'Sarah Johnson',
       route: 'Route B-2',
-      date: format(addDays(currentWeek, 0), 'yyyy-MM-dd'), // Monday
+      date: format(addDays(currentWeek, 0), 'yyyy-MM-dd'),
       startTime: '06:00',
       endTime: '14:00',
       status: 'scheduled',
       vehicle: 'TRK-002',
-      hoursWorked: 8
+      hoursWorked: 8,
     },
     {
       id: 'shift-3',
       driver: 'Mike Rodriguez',
       route: 'Route C-3',
-      date: format(addDays(currentWeek, 1), 'yyyy-MM-dd'), // Tuesday
+      date: format(addDays(currentWeek, 1), 'yyyy-MM-dd'),
       startTime: '07:00',
       endTime: '15:00',
       status: 'confirmed',
       vehicle: 'TRK-003',
-      hoursWorked: 8
+      hoursWorked: 8,
     },
     {
       id: 'shift-4',
       driver: 'John Smith',
       route: 'Route A-1',
-      date: format(addDays(currentWeek, 2), 'yyyy-MM-dd'), // Wednesday
+      date: format(addDays(currentWeek, 2), 'yyyy-MM-dd'),
       startTime: '08:00',
       endTime: '16:00',
       status: 'scheduled',
       vehicle: 'TRK-001',
-      hoursWorked: 8
+      hoursWorked: 8,
     },
     {
       id: 'shift-5',
       driver: 'Emily Chen',
       route: 'Route D-4',
-      date: format(addDays(currentWeek, 3), 'yyyy-MM-dd'), // Thursday
+      date: format(addDays(currentWeek, 3), 'yyyy-MM-dd'),
       startTime: '09:00',
       endTime: '17:00',
       status: 'confirmed',
       vehicle: 'TRK-004',
-      hoursWorked: 8
+      hoursWorked: 8,
     },
     {
       id: 'shift-6',
       driver: 'David Wilson',
       route: 'Route E-5',
-      date: format(addDays(currentWeek, 4), 'yyyy-MM-dd'), // Friday
+      date: format(addDays(currentWeek, 4), 'yyyy-MM-dd'),
       startTime: '08:00',
       endTime: '12:00',
       status: 'called_off',
       vehicle: 'TRK-005',
-      hoursWorked: 0
+      hoursWorked: 0,
     },
     {
       id: 'shift-7',
       driver: 'Lisa Brown',
       route: 'Route F-6',
-      date: format(addDays(currentWeek, 5), 'yyyy-MM-dd'), // Saturday
+      date: format(addDays(currentWeek, 5), 'yyyy-MM-dd'),
       startTime: '10:00',
       endTime: '14:00',
       status: 'completed',
       vehicle: 'TRK-006',
-      hoursWorked: 4
-    }
+      hoursWorked: 4,
+    },
   ]
 
-  // Combine API shifts with mock shifts (prefer API shifts if available)
-  const allShifts = shifts.length > 0 ? shifts : mockShifts
+  // Prefer API shifts if provided, else mock
+  const allShifts: UiShift[] = shifts.length > 0 ? shifts : mockShifts
 
   // Filter shifts for current week
-  const weekShifts = allShifts.filter(shift => {
-    const shiftDate = new Date(shift.date)
-    const weekStart = currentWeek
-    const weekEnd = addDays(currentWeek, 6)
-    return shiftDate >= weekStart && shiftDate <= weekEnd
+  const weekShifts = allShifts.filter((shift) => {
+    const d = new Date(shift.date)
+    const wkStart = currentWeek
+    const wkEnd = addDays(currentWeek, 6)
+    return d >= wkStart && d <= wkEnd
   })
 
   // Apply filters
-  const filteredShifts = weekShifts.filter(shift => {
+  const filteredShifts = weekShifts.filter((shift) => {
     if (filterDriver !== 'all' && shift.driver !== filterDriver) return false
     if (filterRoute !== 'all' && shift.route !== filterRoute) return false
     if (filterVehicle !== 'all' && shift.vehicle !== filterVehicle) return false
-    if (searchTerm && !shift.driver.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !shift.route.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (
+      searchTerm &&
+      !shift.driver.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !shift.route.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+      return false
     return true
   })
 
   // Group shifts by day
-  const shiftsGroupedByDay = weekDays.map(day => ({
+  const shiftsGroupedByDay = weekDays.map((day) => ({
     date: day,
-    shifts: filteredShifts.filter(shift => isSameDay(new Date(shift.date), day))
+    shifts: filteredShifts.filter((shift) =>
+      isSameDay(new Date(shift.date), day)
+    ),
   }))
 
-  // Calculate driver hours for the current week
-  const driverHours = mockDrivers.map(driver => {
-    const driverShifts = weekShifts.filter(shift => shift.driver === driver.name)
-    const totalHours = driverShifts.reduce((sum, shift) => sum + (shift.hoursWorked || 8), 0)
-    const totalShifts = driverShifts.length
-    return {
-      name: driver.name,
-      hours: totalHours,
-      shifts: totalShifts,
-      status: totalHours > 40 ? 'overtime' : totalHours > 32 ? 'full' : 'part'
-    }
-  }).sort((a, b) => b.hours - a.hours)
-
-  // Get unique drivers, routes, and vehicles for filters - FILTER OUT EMPTY STRINGS
-  const uniqueDrivers = [...new Set(allShifts.map(s => s.driver).filter(driver => driver && driver.trim() !== ''))].sort()
-  const uniqueRoutes = [...new Set(allShifts.map(s => s.route).filter(route => route && route.trim() !== ''))].sort()
-  const uniqueVehicles = [...new Set(allShifts.map(s => s.vehicle).filter(vehicle => vehicle && vehicle.trim() !== ''))].sort()
-
-  const handlePreviousWeek = () => {
-    setCurrentWeek(subWeeks(currentWeek, 1))
-  }
-
-  const handleNextWeek = () => {
-    setCurrentWeek(addWeeks(currentWeek, 1))
-  }
-
-  const getCurrentTime = () => {
-    return format(new Date(), 'HH:mm')
-  }
-
-  const getCurrentShift = (dayShifts: Shift[]) => {
-    if (!dayShifts.length || !isToday(new Date(dayShifts[0].date))) return null
-    const currentTime = getCurrentTime()
-    return dayShifts.find(shift => {
-      return shift.startTime <= currentTime && shift.endTime >= currentTime
+  // Driver hours summary (using mock name list for display)
+  const driverHours = mockDrivers
+    .map((driver) => {
+      const driverShifts = weekShifts.filter((s) => s.driver === driver.name)
+      const totalHours = driverShifts.reduce(
+        (sum, s) => sum + (s.hoursWorked ?? 8),
+        0
+      )
+      const totalShifts = driverShifts.length
+      return {
+        name: driver.name,
+        hours: totalHours,
+        shifts: totalShifts,
+        status: totalHours > 40 ? 'overtime' : totalHours > 32 ? 'full' : 'part',
+      }
     })
+    .sort((a, b) => b.hours - a.hours)
+
+  // Unique values for filters
+  const uniqueDrivers = [...new Set(allShifts.map((s) => s.driver).filter(Boolean))].sort()
+  const uniqueRoutes = [...new Set(allShifts.map((s) => s.route).filter(Boolean))].sort()
+  const uniqueVehicles = [...new Set(allShifts.map((s) => s.vehicle).filter(Boolean))].sort()
+
+  const handlePreviousWeek = () => setCurrentWeek(subWeeks(currentWeek, 1))
+  const handleNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1))
+
+  const getCurrentTime = () => format(new Date(), 'HH:mm')
+
+  const getCurrentShift = (dayShifts: UiShift[]) => {
+    if (!dayShifts.length || !isToday(new Date(dayShifts[0].date))) return null
+    const now = getCurrentTime()
+    return dayShifts.find((s) => s.startTime <= now && s.endTime >= now) || null
   }
 
-  const getHoursColor = (hours: number) => {
-    if (hours > 40) return 'text-red-600'
-    if (hours > 32) return 'text-green-600'
-    return 'text-yellow-600'
-  }
+  const getHoursColor = (h: number) =>
+    h > 40 ? 'text-red-600' : h > 32 ? 'text-green-600' : 'text-yellow-600'
 
   const clearAllFilters = () => {
     setFilterDriver('all')
@@ -239,7 +266,7 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
             </Button>
           </div>
         </div>
-        
+
         <Button onClick={onCreateShift} className="flex items-center space-x-2">
           <Plus className="w-4 h-4" />
           <span>Create Shift</span>
@@ -307,7 +334,7 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
                 <SelectContent>
                   <SelectItem value="all">All vehicles</SelectItem>
                   {uniqueVehicles.map((vehicle) => (
-                    <SelectItem key={vehicle} value={vehicle}>
+                    <SelectItem key={vehicle} value={vehicle || ''}>
                       {vehicle}
                     </SelectItem>
                   ))}
@@ -316,11 +343,7 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
             </div>
 
             <div className="flex items-end">
-              <Button
-                variant="outline"
-                onClick={clearAllFilters}
-                className="w-full"
-              >
+              <Button variant="outline" onClick={clearAllFilters} className="w-full">
                 Clear Filters
               </Button>
             </div>
@@ -335,21 +358,23 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
             {shiftsGroupedByDay.map(({ date, shifts }, dayIndex) => {
               const isCurrentDay = isToday(date)
               const currentShift = getCurrentShift(shifts)
-              
+
               return (
                 <div key={dayIndex} className="space-y-3">
                   {/* Day Header */}
-                  <div className={`text-center p-3 rounded-lg border ${
-                    isCurrentDay 
-                      ? 'bg-primary text-primary-foreground border-primary' 
-                      : 'bg-muted border-border-soft'
-                  }`}>
-                    <div className="font-medium text-sm">
-                      {format(date, 'EEE')}
-                    </div>
-                    <div className={`text-lg font-semibold ${
-                      isCurrentDay ? 'text-primary-foreground' : 'text-foreground'
-                    }`}>
+                  <div
+                    className={`text-center p-3 rounded-lg border ${
+                      isCurrentDay
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-muted border-border-soft'
+                    }`}
+                  >
+                    <div className="font-medium text-sm">{format(date, 'EEE')}</div>
+                    <div
+                      className={`text-lg font-semibold ${
+                        isCurrentDay ? 'text-primary-foreground' : 'text-foreground'
+                      }`}
+                    >
                       {format(date, 'd')}
                     </div>
                   </div>
@@ -365,28 +390,34 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
                         <div
                           key={shift.id}
                           className={`${
-                            currentShift?.id === shift.id
-                              ? 'ring-2 ring-primary shadow-md'
-                              : ''
+                            currentShift?.id === shift.id ? 'ring-2 ring-primary shadow-md' : ''
                           }`}
                         >
                           <DriverCard
                             shift={{
                               id: shift.id,
-                              driver: shift.driver, // This might be an ID or name depending on data source
-                              driverName: shift.driverName || shift.driver, // Use driverName if available, fallback to driver
+                              driver: shift.driver,
+                              driverName: shift.driverName || shift.driver,
                               route: shift.route,
                               date: shift.date,
                               vehicle: shift.vehicle || '',
                               start_time: shift.startTime || '08:00',
                               end_time: shift.endTime || '16:00',
-                              status: shift.status as 'scheduled' | 'confirmed' | 'pending' | 'called_off' | 'completed',
+                              status: shift.status,
                               hours_worked: shift.hoursWorked,
                               backup_driver: shift.backupDriver,
-                              backup_driver_name: shift.backupDriverName || shift.backupDriver
+                              backup_driver_name:
+                                shift.backupDriverName || shift.backupDriver,
                             }}
                             compact={true}
-                            onClick={(shiftData) => onEditShift && onEditShift({ ...shiftData, id: shift.id, driverName: shift.driverName || shift.driver })}
+                            onClick={(shiftData) =>
+                              onEditShift &&
+                              onEditShift({
+                                ...shiftData,
+                                id: shift.id,
+                                driverName: shift.driverName || shift.driver,
+                              })
+                            }
                           />
                         </div>
                       ))
@@ -409,7 +440,10 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
             </CardHeader>
             <CardContent className="space-y-3">
               {driverHours.map((driver) => (
-                <div key={driver.name} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div
+                  key={driver.name}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{driver.name}</div>
                     <div className="text-xs text-muted-foreground">
@@ -421,7 +455,9 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
                       {driver.hours}h
                     </span>
                     {driver.hours > 40 && (
-                      <Badge variant="destructive" className="text-xs">OT</Badge>
+                      <Badge variant="destructive" className="text-xs">
+                        OT
+                      </Badge>
                     )}
                   </div>
                 </div>
@@ -433,7 +469,7 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
                 </div>
               )}
 
-              {/* Summary Stats */}
+              {/* Summary */}
               <div className="pt-4 border-t space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Hours:</span>
@@ -444,13 +480,13 @@ export function ScheduleBoard({ onCreateShift, shifts, onUpdateShift, onDeleteSh
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Active Drivers:</span>
                   <span className="font-medium">
-                    {driverHours.filter(d => d.hours > 0).length}
+                    {driverHours.filter((d) => d.hours > 0).length}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Overtime:</span>
                   <span className="font-medium text-red-600">
-                    {driverHours.filter(d => d.hours > 40).length}
+                    {driverHours.filter((d) => d.hours > 40).length}
                   </span>
                 </div>
               </div>
