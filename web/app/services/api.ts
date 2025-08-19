@@ -31,29 +31,65 @@ export type Notification = {
   timestamp?: string;
 };
 
+export type ApiResponse<T> = 
+  | { success: true; data: T }
+  | { success: false; error: string };
+
 export const apiService = { 
-  getShifts: async (accessToken?: string | null) => {
-    return { success: true, data: { shifts: [] } };
+  getShifts: async (accessToken?: string | null): Promise<ApiResponse<{ shifts: Shift[] }>> => {
+    try {
+      return { success: true, data: { shifts: [] } };
+    } catch (error) {
+      return { success: false, error: 'Failed to fetch shifts' };
+    }
   },
-  getDrivers: async (accessToken?: string | null) => {
-    return { success: true, data: { drivers: [] } };
+  getDrivers: async (accessToken?: string | null): Promise<ApiResponse<{ drivers: Driver[] }>> => {
+    try {
+      return { success: true, data: { drivers: [] } };
+    } catch (error) {
+      return { success: false, error: 'Failed to fetch drivers' };
+    }
   },
-  getTickets: async (accessToken?: string | null) => {
-    return { success: true, data: { tickets: [] } };
+  getTickets: async (accessToken?: string | null): Promise<ApiResponse<{ tickets: any[] }>> => {
+    try {
+      return { success: true, data: { tickets: [] } };
+    } catch (error) {
+      return { success: false, error: 'Failed to fetch tickets' };
+    }
   },
-  getNotifications: async (accessToken?: string | null) => {
-    return { success: true, data: { notifications: [] } };
+  getNotifications: async (accessToken?: string | null): Promise<ApiResponse<{ notifications: Notification[] }>> => {
+    try {
+      return { success: true, data: { notifications: [] } };
+    } catch (error) {
+      return { success: false, error: 'Failed to fetch notifications' };
+    }
   },
-  getPayoutRequests: async (accessToken?: string | null) => {
-    return { success: true, data: { payoutRequests: [] } };
+  getPayoutRequests: async (accessToken?: string | null): Promise<ApiResponse<{ payoutRequests: PayoutRequest[] }>> => {
+    try {
+      return { success: true, data: { payoutRequests: [] } };
+    } catch (error) {
+      return { success: false, error: 'Failed to fetch payout requests' };
+    }
   },
-  createTicket: async (data: unknown, accessToken?: string | null) => {
-    return { success: true, data: {} };
+  createTicket: async (data: unknown, accessToken?: string | null): Promise<ApiResponse<{}>> => {
+    try {
+      return { success: true, data: {} };
+    } catch (error) {
+      return { success: false, error: 'Failed to create ticket' };
+    }
   },
-  updateTicket: async (id: string, data: unknown, accessToken?: string | null) => {
-    return { success: true, data: {} };
+  updateTicket: async (id: string, data: unknown, accessToken?: string | null): Promise<ApiResponse<{}>> => {
+    try {
+      return { success: true, data: {} };
+    } catch (error) {
+      return { success: false, error: 'Failed to update ticket' };
+    }
   },
-  deleteTicket: async (id: string, accessToken?: string | null) => {
-    return { success: true, data: {} };
+  deleteTicket: async (id: string, accessToken?: string | null): Promise<ApiResponse<{}>> => {
+    try {
+      return { success: true, data: {} };
+    } catch (error) {
+      return { success: false, error: 'Failed to delete ticket' };
+    }
   }
 };
