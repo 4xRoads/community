@@ -35,7 +35,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from './hooks/useAuth'
 import { apiService, type Shift, type Driver, type PayoutRequest, type Notification } from './services/api'
-import { toast } from 'sonner'
+import { toast } from './services/toast'
 
 export default function App() {
   const [activeView, setActiveView] = useState('dashboard')
