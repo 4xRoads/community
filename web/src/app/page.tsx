@@ -1,5 +1,5 @@
 ﻿"use client";
-import { ScheduleBoard, UiShift } from "../components/ScheduleBoard";
+import { ScheduleBoard, UiShift } from "@/components/ScheduleBoard";
 
 export default function Home() {
   // leave empty so ScheduleBoard uses its internal mocks
