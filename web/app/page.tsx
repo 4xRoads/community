@@ -142,7 +142,7 @@ export default function App() {
       if (shiftsResult.success && shiftsResult.data) {
         setShifts(shiftsResult.data.shifts || [])
       } else {
-        console.error('Failed to load shifts:', shiftsResult.error)
+        console.error('Failed to load shifts:', !shiftsResult.success ? shiftsResult.error : 'Unknown error')
       }
 
       // Load drivers if admin
@@ -151,14 +151,14 @@ export default function App() {
         if (driversResult.success && driversResult.data) {
           setDrivers(driversResult.data.drivers || [])
         } else {
-          console.error('Failed to load drivers:', driversResult.error)
+          console.error('Failed to load drivers:', !driversResult.success ? driversResult.error : 'Unknown error')
         }
 
         const payoutsResult = await apiService.getPayoutRequests(accessToken)
         if (payoutsResult.success && payoutsResult.data) {
           setPayoutRequests(payoutsResult.data.payouts || [])
         } else {
-          console.error('Failed to load payouts:', payoutsResult.error)
+          console.error('Failed to load payouts:', !payoutsResult.success ? payoutsResult.error : 'Unknown error')
         }
       }
 
@@ -168,7 +168,7 @@ export default function App() {
         if (notificationsResult.success && notificationsResult.data) {
           setNotifications(notificationsResult.data.notifications || [])
         } else {
-          console.error('Failed to load notifications:', notificationsResult.error)
+          console.error('Failed to load notifications:', !notificationsResult.success ? notificationsResult.error : 'Unknown error')
         }
       }
     } catch (error: unknown) {
@@ -400,8 +400,8 @@ export default function App() {
             shift.id === selectedShift.id ? result.data.shift : shift
           ))
         } else {
-          console.error('Update shift error:', result.error)
-          toast.error(result.error || 'Failed to update shift')
+          console.error('Update shift error:', !result.success ? result.error : 'Unknown error')
+          toast.error((!result.success ? result.error : null) || 'Failed to update shift')
         }
       } else {
         console.log('Creating new shift with data:', shiftData)
@@ -421,8 +421,8 @@ export default function App() {
             }, accessToken)
           }
         } else {
-          console.error('Create shift error:', result.error)
-          toast.error(result.error || 'Failed to create shift')
+          console.error('Create shift error:', !result.success ? result.error : 'Unknown error')
+          toast.error((!result.success ? result.error : null) || 'Failed to create shift')
         }
       }
       
@@ -446,7 +446,7 @@ export default function App() {
           shift.id === shiftId ? result.data.shift : shift
         ))
       } else {
-        toast.error(result.error || 'Failed to update shift')
+        toast.error((!result.success ? result.error : null) || 'Failed to update shift')
       }
     } catch (error: unknown) {
       console.error('Error updating shift:', error)
@@ -463,7 +463,7 @@ export default function App() {
         toast.success('Shift deleted successfully!')
         setShifts(prev => prev.filter(shift => shift.id !== shiftId))
       } else {
-        toast.error(result.error || 'Failed to delete shift')
+        toast.error((!result.success ? result.error : null) || 'Failed to delete shift')
       }
     } catch (error: unknown) {
       console.error('Error deleting shift:', error)
@@ -482,7 +482,7 @@ export default function App() {
           loadInitialData()
         }
       } else {
-        toast.error(result.error || 'Failed to request payout')
+        toast.error((!result.success ? result.error : null) || 'Failed to request payout')
       }
     } catch (error: unknown) {
       console.error('Error requesting payout:', error)
@@ -501,7 +501,7 @@ export default function App() {
           payout.id === payoutId ? result.data.payout : payout
         ))
       } else {
-        toast.error(result.error || 'Failed to approve payout')
+        toast.error((!result.success ? result.error : null) || 'Failed to approve payout')
       }
     } catch (error: unknown) {
       console.error('Error approving payout:', error)
@@ -571,7 +571,7 @@ export default function App() {
       setTickets([])
       setSelectedTicket(null)
     } else {
-      toast.error(result.error || 'Failed to sign out')
+      toast.error((!result.success ? result.error : null) || 'Failed to sign out')
     }
   }
 
@@ -1182,3 +1182,6 @@ export default function App() {
     </div>
   )
 }
+
+
+
