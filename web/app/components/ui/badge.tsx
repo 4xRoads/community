@@ -1,6 +1,4 @@
-﻿# Overwrite the existing badge.tsx with the corrected version that accepts variant
-@"
-import * as React from "react";
+﻿import * as React from "react";
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: "default" | "secondary" | "destructive" | "outline";
@@ -23,4 +21,3 @@ export function Badge({ variant = "default", className = "", ...props }: BadgePr
     />
   );
 }
-"@ | Out-File -FilePath "web\app\components\ui\badge.tsx" -Encoding UTF8 -Force
