@@ -1,6 +1,7 @@
 ﻿"use client";
 import { ScheduleBoard, UiShift } from "@/components/ScheduleBoard";
 
+// Fixed import path to use absolute import
 export default function Home() {
   // leave empty so ScheduleBoard uses its internal mocks
   const shifts: UiShift[] = [];
