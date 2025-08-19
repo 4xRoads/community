@@ -1,12 +1,22 @@
-import * as React from "react";
+﻿import * as React from "react";
 
-export function Badge({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: "default" | "secondary" | "destructive" | "outline";
+}
+
+export function Badge({ variant = "default", className = "", ...props }: BadgeProps) {
+  const baseClasses = "inline-flex items-center rounded-md border px-2 py-0.5 text-xs";
+  
+  const variantClasses = {
+    default: "bg-primary text-primary-foreground border-transparent",
+    secondary: "bg-secondary text-secondary-foreground border-transparent", 
+    destructive: "bg-red-600 text-white border-transparent",
+    outline: "border-input bg-background text-foreground"
+  };
+
   return (
     <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
       {...props}
     />
   );
