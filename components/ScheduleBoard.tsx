@@ -1,3 +1,40 @@
+// ✅ Minimal UI shape (keeps the component simple & mock-friendly)
+export type UiShift = {
+  id: string;
+  driver: string;
+  driverName?: string;
+  route: string;
+  date: string;      // yyyy-MM-dd
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+  status: "scheduled" | "confirmed" | "pending" | "called_off" | "completed";
+  vehicle?: string;
+  backupDriver?: string;
+  backupDriverName?: string;
+  hoursWorked?: number;
+};
+
+type UpdateShiftPayload = Partial<UiShift>;
+
+interface ScheduleBoardProps {
+  onCreateShift: () => void;
+  shifts: UiShift[]; // If empty, this component falls back to its own mocks
+  onUpdateShift?: (shiftId: string, data: UpdateShiftPayload) => void;
+  onDeleteShift?: (shiftId: string) => void;
+  onEditShift?: (shiftData: UiShift) => void;
+}
+
+export function ScheduleBoard({
+  onCreateShift,
+  shifts,
+  // underscore these to mark intentionally unused (silences @typescript-eslint/no-unused-vars)
+  onUpdateShift: _onUpdateShift,
+  onDeleteShift: _onDeleteShift,
+  onEditShift,
+}: ScheduleBoardProps) {
+
+
+
 "use client";
 
 import { useState } from "react";

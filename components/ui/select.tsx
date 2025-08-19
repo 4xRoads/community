@@ -1,3 +1,4 @@
+// src/components/ui/select.tsx
 "use client";
 
 import * as React from "react";
@@ -13,26 +14,34 @@ type ItemProps = { value: string; children: React.ReactNode };
 
 const SelectItemCtx = React.createContext<ItemProps[] | null>(null);
 
-function isReactElement(node: React.ReactNode): node is React.ReactElement {
-  return typeof node === "object" && node !== null && "props" in (node as object);
+// A narrow definition for "React element with children"
+type ElementWithChildren = React.ReactElement<{ children?: React.ReactNode }>;
+
+function isElementWithChildren(node: unknown): node is ElementWithChildren {
+  return Boolean(
+    node &&
+      typeof node === "object" &&
+      // @ts-expect-error -- runtime check
+      "props" in node
+  );
 }
 
 function collectItems(node: React.ReactNode, out: ItemProps[] = []): ItemProps[] {
   React.Children.forEach(node, (child) => {
-    if (!isReactElement(child)) return;
+    if (!child || typeof child !== "object") return;
 
-    const typeName =
-      // @ts-expect-error runtime tag check
-      child.type?.displayName || (child.type as { name?: string })?.name;
+    // We need runtime tag name to detect <SelectItem />
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error runtime tag check
+    const typeName: string | undefined = child.type?.displayName ?? child.type?.name;
 
     if (typeName === "SelectItem") {
       const el = child as React.ReactElement<ItemProps>;
       out.push({ value: el.props.value, children: el.props.children });
     }
 
-    const kids: unknown = child.props?.children;
-    if (kids !== undefined) {
-      collectItems(kids as React.ReactNode, out);
+    if (isElementWithChildren(child) && child.props?.children) {
+      collectItems(child.props.children, out);
     }
   });
   return out;
@@ -40,6 +49,7 @@ function collectItems(node: React.ReactNode, out: ItemProps[] = []): ItemProps[]
 
 export function Select({ value, onValueChange, children, className = "" }: SelectRootProps) {
   const items = collectItems(children);
+
   return (
     <div className={className}>
       <select
@@ -53,17 +63,15 @@ export function Select({ value, onValueChange, children, className = "" }: Selec
           </option>
         ))}
       </select>
-      {/* Keep children mounted (hidden) so the API matches Radix-like composition */}
+
+      {/* Render children invisibly so JSX tree stays compatible (no layout impact) */}
       <div className="hidden">{children}</div>
     </div>
   );
 }
 Select.displayName = "Select";
 
-export function SelectTrigger({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function SelectTrigger({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={className} {...props} />;
 }
 SelectTrigger.displayName = "SelectTrigger";
@@ -73,10 +81,7 @@ export function SelectValue({ placeholder }: { placeholder?: string }) {
 }
 SelectValue.displayName = "SelectValue";
 
-export function SelectContent({
-  className = "",
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function SelectContent({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={className} {...props} />;
 }
 SelectContent.displayName = "SelectContent";
