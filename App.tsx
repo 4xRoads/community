@@ -18,6 +18,7 @@ import { CoverageSuggestionDrawer } from './components/CoverageSuggestionDrawer'
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
+import { Switch } from './components/ui/switch'
 import { Toaster } from './components/ui/sonner'
 import { 
   Bell, 
@@ -28,7 +29,8 @@ import {
   CreditCard, 
   Loader2,
   LayoutDashboard,
-  MessageSquare
+  MessageSquare,
+  CalendarDays
 } from 'lucide-react'
 import { useAuth } from './hooks/useAuth'
 import { apiService, type Shift, type Driver, type PayoutRequest, type Notification } from './services/api'
@@ -54,6 +56,11 @@ export default function App() {
   const [disambiguationData, setDisambiguationData] = useState<any[]>([])
   const [conflictData, setConflictData] = useState<any[]>([])
   const [coverageData, setCoverageData] = useState<any>({})
+  
+  // Settings states - Updated to use toggles for payroll
+  const [payrollIntegrationsEnabled, setPayrollIntegrationsEnabled] = useState(false)
+  const [smsNotificationsEnabled, setSmsNotificationsEnabled] = useState(false)
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(false)
   
   // Existing state
   const [shifts, setShifts] = useState<Shift[]>([])
@@ -361,17 +368,17 @@ export default function App() {
       driver: shiftData.driver || 'unassigned',
       driverName: shiftData.driverName || getDriverNameById(shiftData.driver),
       route: shiftData.route,
-      date: shiftData.date,
+      date: new Date(shiftData.date),
       vehicle: shiftData.vehicle,
       start_time: shiftData.startTime || shiftData.start_time,
       end_time: shiftData.endTime || shiftData.end_time,
       status: shiftData.status,
       hours_worked: shiftData.hoursWorked || shiftData.hours_worked,
-      backup_driver: shiftData.backupDriver || shiftData.backup_driver || 'none',
-      backup_driver_name: shiftData.backup_driver_name || getDriverNameById(shiftData.backupDriver || shiftData.backup_driver) || 'None',
+      backup_drivers: shiftData.backupDrivers || shiftData.backup_drivers || [],
+      backup_driver_names: shiftData.backup_driver_names || [],
       qualification: shiftData.qualifications || shiftData.qualification || [],
       repeat: false,
-      repeat_end_date: ''
+      repeat_end_date: undefined
     })
     setIsEditingShift(true)
     setShowShiftModal(true)
@@ -499,6 +506,22 @@ export default function App() {
       console.error('Error approving payout:', error)
       toast.error('Failed to approve payout')
     }
+  }
+
+  // Settings handlers - Updated for payroll integrations toggle
+  const handlePayrollIntegrationsToggle = (enabled: boolean) => {
+    setPayrollIntegrationsEnabled(enabled)
+    toast.success(enabled ? 'Payroll integrations enabled' : 'Payroll integrations disabled')
+  }
+
+  const handleSmsNotificationToggle = (enabled: boolean) => {
+    setSmsNotificationsEnabled(enabled)
+    toast.success(enabled ? 'SMS notifications enabled' : 'SMS notifications disabled')
+  }
+
+  const handleEmailNotificationToggle = (enabled: boolean) => {
+    setEmailNotificationsEnabled(enabled)
+    toast.success(enabled ? 'Email notifications enabled' : 'Email notifications disabled')
   }
 
   // Ticket handlers
@@ -671,18 +694,23 @@ export default function App() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Instant Payouts</h4>
-                    <p className="text-sm text-muted-foreground">Allow drivers to request instant payouts</p>
+                    <h4 className="font-medium">Payroll Settings</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {payrollIntegrationsEnabled 
+                        ? 'Payroll integrations enabled for automated timesheets' 
+                        : 'Enable payroll integrations for automated timesheets'
+                      }
+                    </p>
                   </div>
-                  <Button variant="outline">Enabled</Button>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Auto-approve payouts</h4>
-                    <p className="text-sm text-muted-foreground">Automatically approve payouts under $500</p>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-muted-foreground">
+                      {payrollIntegrationsEnabled ? 'Enabled' : 'Not Enabled'}
+                    </span>
+                    <Switch
+                      checked={payrollIntegrationsEnabled}
+                      onCheckedChange={handlePayrollIntegrationsToggle}
+                    />
                   </div>
-                  <Button variant="outline">Disabled</Button>
                 </div>
               </CardContent>
             </Card>
@@ -697,17 +725,43 @@ export default function App() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium">SMS Notifications</h4>
-                <p className="text-sm text-muted-foreground">Receive text messages for urgent updates</p>
+                <p className="text-sm text-muted-foreground">
+                  {smsNotificationsEnabled 
+                    ? 'Receive text messages for urgent updates' 
+                    : 'Turn on to receive text messages for urgent updates'
+                  }
+                </p>
               </div>
-              <Button variant="outline">Enabled</Button>
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-muted-foreground">
+                  {smsNotificationsEnabled ? 'Enabled' : 'Not Enabled'}
+                </span>
+                <Switch
+                  checked={smsNotificationsEnabled}
+                  onCheckedChange={handleSmsNotificationToggle}
+                />
+              </div>
             </div>
             
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium">Email Notifications</h4>
-                <p className="text-sm text-muted-foreground">Receive email summaries and updates</p>
+                <p className="text-sm text-muted-foreground">
+                  {emailNotificationsEnabled 
+                    ? 'Receive email summaries and updates' 
+                    : 'Turn on to receive email summaries and updates'
+                  }
+                </p>
               </div>
-              <Button variant="outline">Enabled</Button>
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-muted-foreground">
+                  {emailNotificationsEnabled ? 'Enabled' : 'Not Enabled'}
+                </span>
+                <Switch
+                  checked={emailNotificationsEnabled}
+                  onCheckedChange={handleEmailNotificationToggle}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -949,6 +1003,22 @@ export default function App() {
             onUpdateShift={handleShiftUpdate}
             onDeleteShift={handleShiftDelete}
             onEditShift={handleEditShift}
+          />
+        )
+      case 'company-calendar':
+        return (
+          <ComingSoonCard
+            title="Company Calendar"
+            description="Centralized calendar system for managing company-wide schedules, events, and departmental coordination."
+            icon={<CalendarDays className="w-8 h-8" />}
+            features={[
+              'All department schedule',
+              'See one-time events',
+              'Monthly recap summary',
+              'Simplify recurring events',
+              'Receive reminders',
+              'Consistent work execution'
+            ]}
           />
         )
       case 'payroll':
