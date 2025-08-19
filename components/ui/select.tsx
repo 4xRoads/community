@@ -13,36 +13,33 @@ type ItemProps = { value: string; children: React.ReactNode };
 
 const SelectItemCtx = React.createContext<ItemProps[] | null>(null);
 
+function isReactElement(node: React.ReactNode): node is React.ReactElement {
+  return typeof node === "object" && node !== null && "props" in (node as object);
+}
+
 function collectItems(node: React.ReactNode, out: ItemProps[] = []): ItemProps[] {
   React.Children.forEach(node, (child) => {
-    if (!child || typeof child !== "object") return;
+    if (!isReactElement(child)) return;
 
-    const el = child as React.ReactElement<{ value?: string; children?: React.ReactNode }>;
+    const typeName =
+      // @ts-expect-error runtime tag check
+      child.type?.displayName || (child.type as { name?: string })?.name;
 
-    // Try to read a "component name" without using `any`
-    const typeObj = el.type as { displayName?: string; name?: string } | Function;
-    const tag =
-      (typeObj as { displayName?: string }).displayName ??
-      (typeObj as { name?: string }).name ??
-      "";
-
-    if (tag === "SelectItem") {
-      out.push({
-        value: String(el.props.value ?? ""),
-        children: el.props.children ?? "",
-      });
+    if (typeName === "SelectItem") {
+      const el = child as React.ReactElement<ItemProps>;
+      out.push({ value: el.props.value, children: el.props.children });
     }
 
-    const kids =
-      (el.props as { children?: React.ReactNode } | undefined)?.children;
-    if (kids) collectItems(kids, out);
+    const kids: unknown = child.props?.children;
+    if (kids !== undefined) {
+      collectItems(kids as React.ReactNode, out);
+    }
   });
   return out;
 }
 
 export function Select({ value, onValueChange, children, className = "" }: SelectRootProps) {
   const items = collectItems(children);
-
   return (
     <div className={className}>
       <select
@@ -56,7 +53,7 @@ export function Select({ value, onValueChange, children, className = "" }: Selec
           </option>
         ))}
       </select>
-      {/* Render children invisibly to keep JSX tree compatible */}
+      {/* Keep children mounted (hidden) so the API matches Radix-like composition */}
       <div className="hidden">{children}</div>
     </div>
   );
