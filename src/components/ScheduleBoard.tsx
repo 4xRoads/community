@@ -41,12 +41,28 @@ export type UiShift = {
   hoursWorked?: number;
 };
 
+// Type for the edit shift callback data
+export type EditShiftData = {
+  id: string;
+  driver: string;
+  driverName?: string;
+  route: string;
+  date: string;
+  vehicle: string;
+  start_time: string;
+  end_time: string;
+  status: "scheduled" | "confirmed" | "pending" | "called_off" | "completed";
+  hours_worked?: number;
+  backup_driver?: string;
+  backup_driver_name?: string;
+};
+
 interface ScheduleBoardProps {
   onCreateShift: () => void;
   shifts: UiShift[]; // If empty, component uses internal mocks
-  onUpdateShift: (shiftId: string, data: Partial<UiShift>) => void;
-  onDeleteShift: (shiftId: string) => void;
-  onEditShift?: (shiftData: unknown) => void; // unknown avoids `any`
+  onUpdateShift?: (shiftId: string, data: Partial<UiShift>) => void;
+  onDeleteShift?: (shiftId: string) => void;
+  onEditShift?: (shiftData: EditShiftData) => void;
 }
 
 // Mock driver data for the summary
@@ -64,8 +80,8 @@ const mockDrivers = [
 export function ScheduleBoard({
   onCreateShift,
   shifts,
-  onUpdateShift: _onUpdateShift, // underscore silences unused-var rule
-  onDeleteShift: _onDeleteShift, // underscore silences unused-var rule
+  onUpdateShift,
+  onDeleteShift,
   onEditShift,
 }: ScheduleBoardProps) {
   const [currentWeek, setCurrentWeek] = useState(() =>
@@ -211,7 +227,6 @@ export function ScheduleBoard({
     })
     .sort((a, b) => b.hours - a.hours);
 
-  // Unique filter values
   const uniqueDrivers = [...new Set(allShifts.map((s) => s.driver).filter(Boolean))].sort();
   const uniqueRoutes = [...new Set(allShifts.map((s) => s.route).filter(Boolean))].sort();
   const uniqueVehicles = [...new Set(allShifts.map((s) => s.vehicle).filter(Boolean))].sort();

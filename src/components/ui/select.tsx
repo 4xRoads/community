@@ -13,11 +13,11 @@ type SelectRootProps = {
 /** Props for an item child */
 type ItemProps = { value: string; children: React.ReactNode };
 
-/** We detect our own child component by reference (no `any` needed) */
+/** We detect our own child component by reference */
 const SelectItemComponent: React.FC<ItemProps> = (_props) => null;
 SelectItemComponent.displayName = "SelectItem";
 
-/** Collect <SelectItem> children safely (no `any`) */
+/** Collect <SelectItem> children safely with proper typing */
 function collectItems(node: React.ReactNode, out: ItemProps[] = []): ItemProps[] {
   React.Children.forEach(node, (child) => {
     if (!child) return;
@@ -26,7 +26,9 @@ function collectItems(node: React.ReactNode, out: ItemProps[] = []): ItemProps[]
         const el = child as React.ReactElement<ItemProps>;
         out.push({ value: el.props.value, children: el.props.children });
       }
-      const kids = (child.props as { children?: React.ReactNode }).children;
+      // Safely access children with proper typing
+      const childProps = child.props as Record<string, unknown>;
+      const kids = childProps.children as React.ReactNode;
       if (kids) collectItems(kids, out);
     }
   });
