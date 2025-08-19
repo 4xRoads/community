@@ -1,40 +1,3 @@
-// ✅ Minimal UI shape (keeps the component simple & mock-friendly)
-export type UiShift = {
-  id: string;
-  driver: string;
-  driverName?: string;
-  route: string;
-  date: string;      // yyyy-MM-dd
-  startTime: string; // HH:mm
-  endTime: string;   // HH:mm
-  status: "scheduled" | "confirmed" | "pending" | "called_off" | "completed";
-  vehicle?: string;
-  backupDriver?: string;
-  backupDriverName?: string;
-  hoursWorked?: number;
-};
-
-type UpdateShiftPayload = Partial<UiShift>;
-
-interface ScheduleBoardProps {
-  onCreateShift: () => void;
-  shifts: UiShift[]; // If empty, this component falls back to its own mocks
-  onUpdateShift?: (shiftId: string, data: UpdateShiftPayload) => void;
-  onDeleteShift?: (shiftId: string) => void;
-  onEditShift?: (shiftData: UiShift) => void;
-}
-
-export function ScheduleBoard({
-  onCreateShift,
-  shifts,
-  // underscore these to mark intentionally unused (silences @typescript-eslint/no-unused-vars)
-  onUpdateShift: _onUpdateShift,
-  onDeleteShift: _onDeleteShift,
-  onEditShift,
-}: ScheduleBoardProps) {
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -68,9 +31,9 @@ export type UiShift = {
   driver: string;
   driverName?: string;
   route: string;
-  date: string;      // yyyy-MM-dd
+  date: string; // yyyy-MM-dd
   startTime: string; // HH:mm
-  endTime: string;   // HH:mm
+  endTime: string; // HH:mm
   status: "scheduled" | "confirmed" | "pending" | "called_off" | "completed";
   vehicle?: string;
   backupDriver?: string;
@@ -78,14 +41,12 @@ export type UiShift = {
   hoursWorked?: number;
 };
 
-type UiShiftUpdate = Partial<UiShift>;
-
 interface ScheduleBoardProps {
   onCreateShift: () => void;
-  shifts: UiShift[]; // If empty, this component falls back to its own mocks
-  onUpdateShift: (shiftId: string, data: UiShiftUpdate) => void;
+  shifts: UiShift[]; // If empty, component uses internal mocks
+  onUpdateShift: (shiftId: string, data: Partial<UiShift>) => void;
   onDeleteShift: (shiftId: string) => void;
-  onEditShift?: (shiftData: UiShift) => void;
+  onEditShift?: (shiftData: unknown) => void; // unknown avoids `any`
 }
 
 // Mock driver data for the summary
@@ -103,9 +64,8 @@ const mockDrivers = [
 export function ScheduleBoard({
   onCreateShift,
   shifts,
-  // These are kept for future wiring; prefix with "_" to avoid the ESLint unused-var warning
-  onUpdateShift: _onUpdateShift,
-  onDeleteShift: _onDeleteShift,
+  onUpdateShift: _onUpdateShift, // underscore silences unused-var rule
+  onDeleteShift: _onDeleteShift, // underscore silences unused-var rule
   onEditShift,
 }: ScheduleBoardProps) {
   const [currentWeek, setCurrentWeek] = useState(() =>
@@ -234,30 +194,23 @@ export function ScheduleBoard({
   // Group by day
   const shiftsGroupedByDay = weekDays.map((day) => ({
     date: day,
-    shifts: filteredShifts.filter((shift) =>
-      isSameDay(new Date(shift.date), day)
-    ),
+    shifts: filteredShifts.filter((shift) => isSameDay(new Date(shift.date), day)),
   }));
 
   // Driver-hours summary (uses mockDrivers for a stable list)
   const driverHours = mockDrivers
     .map((driver) => {
       const driverShifts = weekShifts.filter((s) => s.driver === driver.name);
-      const totalHours = driverShifts.reduce(
-        (sum, s) => sum + (s.hoursWorked ?? 8),
-        0
-      );
+      const totalHours = driverShifts.reduce((sum, s) => sum + (s.hoursWorked ?? 8), 0);
       const totalShifts = driverShifts.length;
       return {
         name: driver.name,
         hours: totalHours,
         shifts: totalShifts,
-        status: totalHours > 40 ? "overtime" : totalHours > 32 ? "full" : "part",
       };
     })
     .sort((a, b) => b.hours - a.hours);
 
-  // Unique filter values
   const uniqueDrivers = [...new Set(allShifts.map((s) => s.driver).filter(Boolean))].sort();
   const uniqueRoutes = [...new Set(allShifts.map((s) => s.route).filter(Boolean))].sort();
   const uniqueVehicles = [...new Set(allShifts.map((s) => s.vehicle).filter(Boolean))].sort();
@@ -369,7 +322,7 @@ export function ScheduleBoard({
                 <SelectContent>
                   <SelectItem value="all">All vehicles</SelectItem>
                   {uniqueVehicles.map((vehicle) => (
-                    <SelectItem key={vehicle} value={vehicle || ""}>
+                    <SelectItem key={vehicle ?? "none"} value={vehicle ?? ""}>
                       {vehicle}
                     </SelectItem>
                   ))}
@@ -424,9 +377,7 @@ export function ScheduleBoard({
                       shifts.map((shift) => (
                         <div
                           key={shift.id}
-                          className={`${
-                            currentShift?.id === shift.id ? "ring-2 ring-primary shadow-md" : ""
-                          }`}
+                          className={`${currentShift?.id === shift.id ? "ring-2 ring-primary shadow-md" : ""}`}
                         >
                           <DriverCard
                             shift={{
@@ -441,8 +392,7 @@ export function ScheduleBoard({
                               status: shift.status,
                               hours_worked: shift.hoursWorked,
                               backup_driver: shift.backupDriver,
-                              backup_driver_name:
-                                shift.backupDriverName || shift.backupDriver,
+                              backup_driver_name: shift.backupDriverName || shift.backupDriver,
                             }}
                             compact={true}
                             onClick={(shiftData) =>
@@ -451,13 +401,7 @@ export function ScheduleBoard({
                                 ...shiftData,
                                 id: shift.id,
                                 driverName: shift.driverName || shift.driver,
-                                // convert DriverCard shape back to UiShift where needed
-                                startTime: shiftData.start_time,
-                                endTime: shiftData.end_time,
-                                hoursWorked: shiftData.hours_worked,
-                                backupDriver: shiftData.backup_driver,
-                                backupDriverName: shiftData.backup_driver_name,
-                              } as unknown as UiShift)
+                              })
                             }
                           />
                         </div>

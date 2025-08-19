@@ -1,8 +1,8 @@
-// src/components/ui/select.tsx
 "use client";
 
 import * as React from "react";
 
+/** Root props for our simple Select */
 type SelectRootProps = {
   value: string;
   onValueChange: (val: string) => void;
@@ -10,46 +10,32 @@ type SelectRootProps = {
   className?: string;
 };
 
+/** Props for an item child */
 type ItemProps = { value: string; children: React.ReactNode };
 
-const SelectItemCtx = React.createContext<ItemProps[] | null>(null);
+/** We detect our own child component by reference (no `any` needed) */
+const SelectItemComponent: React.FC<ItemProps> = (_props) => null;
+SelectItemComponent.displayName = "SelectItem";
 
-// A narrow definition for "React element with children"
-type ElementWithChildren = React.ReactElement<{ children?: React.ReactNode }>;
-
-function isElementWithChildren(node: unknown): node is ElementWithChildren {
-  return Boolean(
-    node &&
-      typeof node === "object" &&
-      // @ts-expect-error -- runtime check
-      "props" in node
-  );
-}
-
+/** Collect <SelectItem> children safely (no `any`) */
 function collectItems(node: React.ReactNode, out: ItemProps[] = []): ItemProps[] {
   React.Children.forEach(node, (child) => {
-    if (!child || typeof child !== "object") return;
-
-    // We need runtime tag name to detect <SelectItem />
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error runtime tag check
-    const typeName: string | undefined = child.type?.displayName ?? child.type?.name;
-
-    if (typeName === "SelectItem") {
-      const el = child as React.ReactElement<ItemProps>;
-      out.push({ value: el.props.value, children: el.props.children });
-    }
-
-    if (isElementWithChildren(child) && child.props?.children) {
-      collectItems(child.props.children, out);
+    if (!child) return;
+    if (React.isValidElement(child)) {
+      if (child.type === SelectItemComponent) {
+        const el = child as React.ReactElement<ItemProps>;
+        out.push({ value: el.props.value, children: el.props.children });
+      }
+      const kids = (child.props as { children?: React.ReactNode }).children;
+      if (kids) collectItems(kids, out);
     }
   });
   return out;
 }
 
+/** Root */
 export function Select({ value, onValueChange, children, className = "" }: SelectRootProps) {
   const items = collectItems(children);
-
   return (
     <div className={className}>
       <select
@@ -63,15 +49,18 @@ export function Select({ value, onValueChange, children, className = "" }: Selec
           </option>
         ))}
       </select>
-
-      {/* Render children invisibly so JSX tree stays compatible (no layout impact) */}
+      {/* Keep children in tree (hidden) so API stays compatible */}
       <div className="hidden">{children}</div>
     </div>
   );
 }
 Select.displayName = "Select";
 
-export function SelectTrigger({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
+/** Structural shells (kept for API parity with your existing imports) */
+export function SelectTrigger({
+  className = "",
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={className} {...props} />;
 }
 SelectTrigger.displayName = "SelectTrigger";
@@ -81,13 +70,17 @@ export function SelectValue({ placeholder }: { placeholder?: string }) {
 }
 SelectValue.displayName = "SelectValue";
 
-export function SelectContent({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function SelectContent({
+  className = "",
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={className} {...props} />;
 }
 SelectContent.displayName = "SelectContent";
 
+/** Exported item component that the collector recognizes */
 export function SelectItem({ value, children }: ItemProps) {
-  // Only used for item collection in <Select />
-  return <div data-value={value}>{children}</div>;
+  // Render nothing; only used for metadata collection
+  return <SelectItemComponent value={value}>{children}</SelectItemComponent>;
 }
 SelectItem.displayName = "SelectItem";
