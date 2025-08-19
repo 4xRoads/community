@@ -1,9 +1,14 @@
 ﻿import { useState } from 'react';
 
+type User = {
+  email: string;
+  id: string;
+} | null;
+
 export function useAuth() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(false);
-  const [accessToken, setAccessToken] = useState(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
