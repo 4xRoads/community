@@ -1,9 +1,13 @@
 ﻿export default function Home() {
   return (
-    <div>
-      <h1>Hello World - Test Page</h1>
-      <p>If you can see this, routing is working</p>
-      <p>Current time: {new Date().toISOString()}</p>
-    </div>
+    <html>
+      <body>
+        <div style={{padding: '20px', fontSize: '24px', color: 'red'}}>
+          <h1>🚀 SIMPLE TEST PAGE WORKING!</h1>
+          <p>Deployment time: {new Date().toISOString()}</p>
+          <p>If you see this, Next.js routing is working!</p>
+        </div>
+      </body>
+    </html>
   );
 }
