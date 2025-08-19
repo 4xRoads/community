@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 
@@ -14,7 +14,7 @@ type SelectRootProps = {
 type ItemProps = { value: string; children: React.ReactNode };
 
 /** We detect our own child component by reference */
-const SelectItemComponent: React.FC<ItemProps> = (_props) => null;
+const SelectItemComponent: React.FC<ItemProps> = (__props) => null;
 SelectItemComponent.displayName = "SelectItem";
 
 /** Collect <SelectItem> children safely with proper typing */

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -80,8 +80,8 @@ const mockDrivers = [
 export function ScheduleBoard({
   onCreateShift,
   shifts,
-  onUpdateShift,
-  onDeleteShift,
+  _onUpdateShift,
+  _onDeleteShift,
   onEditShift,
 }: ScheduleBoardProps) {
   const [currentWeek, setCurrentWeek] = useState(() =>
@@ -98,7 +98,7 @@ export function ScheduleBoard({
   // Header range
   const weekStart = format(currentWeek, "MMM d");
   const weekEnd = format(addDays(currentWeek, 6), "MMM d, yyyy");
-  const weekRange = `${weekStart}–${weekEnd}`;
+  const weekRange = `${weekStart}â€“${weekEnd}`;
 
   // Local mock shifts (typed to UiShift)
   const mockShifts: UiShift[] = [

@@ -171,7 +171,7 @@ export default function App() {
           console.error('Failed to load notifications:', notificationsResult.error)
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading initial data:', error)
       toast.error('Failed to load data')
     } finally {
@@ -186,7 +186,7 @@ export default function App() {
   }, [user, accessToken, loadInitialData])
 
   // AI Action Handlers
-  const handleExecuteAction = (intent: any) => {
+  const handleExecuteAction = (intent: unknown) => {
     switch (intent.action) {
       case 'create_ticket':
         const newTicket: Ticket = {
@@ -280,12 +280,12 @@ export default function App() {
     }
   }
 
-  const handleOpenDisambiguation = (matches: any[]) => {
+  const handleOpenDisambiguation = (matches: unknown[]) => {
     setDisambiguationData(matches)
     setShowDisambiguation(true)
   }
 
-  const handleOpenConflicts = (conflicts: any[]) => {
+  const handleOpenConflicts = (conflicts: unknown[]) => {
     const formattedConflicts = conflicts.map(conflict => ({
       id: `conflict-${Date.now()}-${Math.random()}`,
       type: conflict.type,
@@ -328,7 +328,7 @@ export default function App() {
   }
 
   // Navigation handler for AI Help
-  const handleAINavigation = (view: string, filters?: any) => {
+  const handleAINavigation = (view: string, filters?: unknown) => {
     setActiveView(view)
     setShowAIHelp(false)
     
@@ -346,7 +346,7 @@ export default function App() {
     setShowShiftModal(true)
   }
 
-  const handleEditShift = (shiftData: any) => {
+  const handleEditShift = (shiftData: unknown) => {
     console.log('handleEditShift called with:', shiftData)
     
     // Ensure we have a valid shift ID
@@ -385,7 +385,7 @@ export default function App() {
     setShowShiftModal(true)
   }
 
-  const handleShiftSubmit = async (shiftData: any) => {
+  const handleShiftSubmit = async (shiftData: unknown) => {
     if (!accessToken) return
 
     try {
@@ -429,13 +429,13 @@ export default function App() {
       // Reset editing state
       setSelectedShift(null)
       setIsEditingShift(false)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error with shift operation:', error)
       toast.error(isEditingShift ? 'Failed to update shift' : 'Failed to create shift')
     }
   }
 
-  const handleShiftUpdate = async (shiftId: string, updateData: any) => {
+  const handleShiftUpdate = async (shiftId: string, updateData: unknown) => {
     if (!accessToken) return
 
     try {
@@ -448,7 +448,7 @@ export default function App() {
       } else {
         toast.error(result.error || 'Failed to update shift')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating shift:', error)
       toast.error('Failed to update shift')
     }
@@ -465,7 +465,7 @@ export default function App() {
       } else {
         toast.error(result.error || 'Failed to delete shift')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting shift:', error)
       toast.error('Failed to delete shift')
     }
@@ -484,7 +484,7 @@ export default function App() {
       } else {
         toast.error(result.error || 'Failed to request payout')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error requesting payout:', error)
       toast.error('Failed to request payout')
     }
@@ -503,7 +503,7 @@ export default function App() {
       } else {
         toast.error(result.error || 'Failed to approve payout')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error approving payout:', error)
       toast.error('Failed to approve payout')
     }
@@ -530,7 +530,7 @@ export default function App() {
     setShowTicketModal(true)
   }
 
-  const handleTicketSubmit = (ticketData: any) => {
+  const handleTicketSubmit = (ticketData: unknown) => {
     const newTicket: Ticket = {
       ...ticketData,
       id: `TKT-${String(tickets.length + 1).padStart(3, '0')}`
@@ -1152,12 +1152,12 @@ export default function App() {
         shift={coverageData.shift}
         candidates={coverageData.candidates || []}
         onAssign={(candidateId) => {
-          const candidate = coverageData.candidates?.find((c: any) => c.id === candidateId)
+          const candidate = coverageData.candidates?.find((c: unknown) => c.id === candidateId)
           toast.success(`${candidate?.name} assigned to cover the shift`)
           setShowCoverage(false)
         }}
         onNotify={(candidateId, method) => {
-          const candidate = coverageData.candidates?.find((c: any) => c.id === candidateId)
+          const candidate = coverageData.candidates?.find((c: unknown) => c.id === candidateId)
           toast.success(`${method.toUpperCase()} notification sent to ${candidate?.name}`)
         }}
       />
