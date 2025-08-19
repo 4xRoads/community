@@ -1,21 +1,9 @@
-﻿"use client";
-import { ScheduleBoard, UiShift } from "@/components/ScheduleBoard";
-
-// Fixed import path to use absolute import
-export default function Home() {
-  // leave empty so ScheduleBoard uses its internal mocks
-  const shifts: UiShift[] = [];
-  const noop = () => {};
-  
+﻿export default function Home() {
   return (
-    <main className="p-6 max-w-7xl mx-auto">
-      <ScheduleBoard
-        shifts={shifts}
-        onCreateShift={noop}
-        onUpdateShift={noop}
-        onDeleteShift={noop}
-        onEditShift={noop}
-      />
-    </main>
+    <div>
+      <h1>Hello World - Test Page</h1>
+      <p>If you can see this, routing is working</p>
+      <p>Current time: {new Date().toISOString()}</p>
+    </div>
   );
 }
