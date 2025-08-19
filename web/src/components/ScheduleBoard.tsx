@@ -60,8 +60,8 @@ export type EditShiftData = {
 interface ScheduleBoardProps {
   onCreateShift: () => void;
   shifts: UiShift[]; // If empty, component uses internal mocks
-  onUpdateShift?: (shiftId: string, data: Partial<UiShift>) => void;
-  onDeleteShift?: (shiftId: string) => void;
+  _onUpdateShift?: (shiftId: string, data: Partial<UiShift>) => void;
+  _onDeleteShift?: (shiftId: string) => void;
   onEditShift?: (shiftData: EditShiftData) => void;
 }
 

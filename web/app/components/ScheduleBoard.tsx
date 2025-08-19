@@ -60,8 +60,8 @@ export type EditShiftData = {
 interface ScheduleBoardProps {
   onCreateShift: () => void;
   shifts: UiShift[]; // If empty, component uses internal mocks
-  onUpdateShift?: (shiftId: string, data: Partial<UiShift>) => void;
-  onDeleteShift?: (shiftId: string) => void;
+  _
+  _
   onEditShift?: (shiftData: EditShiftData) => void;
 }
 
@@ -80,8 +80,8 @@ const mockDrivers = [
 export function ScheduleBoard({
   onCreateShift,
   shifts,
-  _onUpdateShift,
-  _onDeleteShift,
+  
+  
   onEditShift,
 }: ScheduleBoardProps) {
   const [currentWeek, setCurrentWeek] = useState(() =>
