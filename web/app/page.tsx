@@ -156,7 +156,7 @@ export default function App() {
 
         const payoutsResult = await apiService.getPayoutRequests(accessToken)
         if (payoutsResult.success && payoutsResult.data) {
-          setPayoutRequests(payoutsResult.data.payouts || [])
+          setPayoutRequests(payoutsResult.data.payoutRequests || [])
         } else {
           console.error('Failed to load payouts:', !payoutsResult.success ? payoutsResult.error : 'Unknown error')
         }
@@ -1182,6 +1182,7 @@ export default function App() {
     </div>
   )
 }
+
 
 
 
