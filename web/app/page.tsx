@@ -146,7 +146,7 @@ export default function App() {
       }
 
       // Load drivers if admin
-      if (user?.role === 'admin') {
+      if ((user as any)?.role === 'admin') {
         const driversResult = await apiService.getDrivers(accessToken)
         if (driversResult.success && driversResult.data) {
           setDrivers(driversResult.data.drivers || [])
@@ -478,7 +478,7 @@ export default function App() {
       const result = await apiService.requestPayout({ amount, hours }, accessToken)
       if (result.success) {
         toast.success('Payout requested successfully!')
-        if (user?.role === 'driver') {
+        if ((user as any)?.role === 'driver') {
           loadInitialData()
         }
       } else {
@@ -657,13 +657,13 @@ export default function App() {
               </div>
               <div>
                 <p className="text-sm font-medium">Role</p>
-                <Badge variant="outline" className="capitalize">{user?.role}</Badge>
+                <Badge variant="outline" className="capitalize">{(user as any)?.role}</Badge>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {user?.role === 'admin' && (
+        {(user as any)?.role === 'admin' && (
           <>
             <Card>
               <CardHeader>
@@ -774,20 +774,20 @@ export default function App() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">Payroll</h2>
-        {user?.role === 'admin' && (
+        {(user as any)?.role === 'admin' && (
           <div className="flex space-x-3">
             <Button variant="outline">Export Hours</Button>
             <Button>Process Payroll</Button>
           </div>
         )}
-        {user?.role === 'driver' && (
+        {(user as any)?.role === 'driver' && (
           <Button onClick={() => handlePayoutRequest(480, 32)}>
             Request Payout
           </Button>
         )}
       </div>
 
-      {user?.role === 'admin' && (
+      {(user as any)?.role === 'admin' && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card>
@@ -874,7 +874,7 @@ export default function App() {
         </>
       )}
 
-      {user?.role === 'driver' && (
+      {(user as any)?.role === 'driver' && (
         <Card>
           <CardHeader>
             <CardTitle>My Earnings</CardTitle>
@@ -913,7 +913,7 @@ export default function App() {
     }
 
     // Handle driver role views
-    if (user?.role === 'driver') {
+    if ((user as any)?.role === 'driver') {
       switch (activeView) {
         case 'dashboard':
           return <DriverDashboard />
@@ -1071,7 +1071,7 @@ export default function App() {
           user={{
             name: user?.name,
             email: user?.email,
-            role: user?.role
+            role: (user as any)?.role
           }}
           notificationCount={totalNotificationCount}
           onSettingsClick={() => setActiveView('settings')}
@@ -1182,6 +1182,7 @@ export default function App() {
     </div>
   )
 }
+
 
 
 
