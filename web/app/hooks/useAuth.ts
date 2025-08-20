@@ -31,3 +31,4 @@ export function useAuth() {
     signOut
   };
 }
+// TypeScript fix for role property
